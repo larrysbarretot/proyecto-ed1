@@ -159,45 +159,50 @@ void quitaSaltoDeLinea(char *linea)
       }
 }
 
-int adicionarRegistro(char *nombreArchivoCSV, NODO *inicio, int numeroDeCampos, Pagina **raiz)
+int adicionarRegistro(char *nombreArchivoCSV, NODO *inicio, int numeroDeCampos, Pagina **raiz, long int *direccionUltima)
 {
    FILE *archivo;
-   NODO *valoresInicio, *valoresFin, *i;
-   tipoClave claveABuscar, claveAAdicionar;
+   tipoClave claveABuscar, claveAAdicionar; // para buscar e insertar en el árbol-b creado para ayudar en algunas operaciones.
+   Pagina *encontrado; // guarda el resultado de la búsqueda en el árbol, si no está valdrá NULL.
    char nombreCampoClave[NOMBRE], clave[CLAVE], valor[NOMBRE], lineaAInsertar[LINEA], *ptrLineaAInsertar; // para legibilidad usamos para los demas campos la variable "valor".
    int j, indiceDePagina = 0;
-   long int direccionLogica;
+   long int direccionLogica; // para guardar e insertar la direccionLogica de la nueva línea al árbol-b.
+   NODO *valoresInicio, *valoresFin, *i; // Lista para almacenar los valores de los campos del CSV
    crearLista(&valoresInicio, &valoresFin);
    leerCampoClave(clave, nombreCampoClave, inicio, "insertar");
-   strcpy(claveABuscar.campo, clave);
-   //printf("%s\n", claveABuscar.campo);
-   if(!buscar(*raiz, claveABuscar, &indiceDePagina)) // buscar devuelve null si no lo encuentra para que ingrese le anteponemos !
-   {
-      insertarFinal(&valoresInicio, &valoresFin, clave, 1); // Insertamos el primer campo sin preguntar.
-      j = 2;
-      i = inicio->siguiente;
-      while(i)
+   strcpy(claveABuscar.campo, clave); // Se utiliza para buscar en el árbol-b
+   encontrado = buscar(*raiz, claveABuscar, &indiceDePagina);
+   if(!encontrado) // si no se encuentra se procede a insertar el nuevo registro tanto en el archivo como en el árbol-b
+   {  // Usamos una lista para guardar los valores de los campos del CSV
+      insertarFinal(&valoresInicio, &valoresFin, clave, 1); // Insertamos el primer campo sin preguntar,
+                                                            // ya que el valor lo tenemos (clave)
+      j = 2; // comenzamos a llenar los demás campos a partir del segundo.
+      i = inicio->siguiente; // comenzamos con el segundo del Esta
+      while(i) // Hasta acabar la lista de cabeceras
       {
          if (j == numeroDeCampos) // Si es el último campo se le inserta "1" sin preguntar.
          {
-            insertarFinal(&valoresInicio, &valoresFin, "1", j);
+            insertarFinal(&valoresInicio, &valoresFin, "1", j); // CAMPO ESTADO por ser adicion EXISTE(1).
             break; // Salimos ya que no hay más campos.
          }
-         printf("%s -> ", i->cadena);
-         gets(valor);
-         insertarFinal(&valoresInicio, &valoresFin, valor, j);
-         i = i->siguiente;
-         j++;
+         printf("%s -> ", i->cadena); // Imprime el nombre del campo que va a recibir un valor.
+         fflush(stdin);
+         gets(valor); // leemos el valor del campo pedido.
+         insertarFinal(&valoresInicio, &valoresFin, valor, j); // Se insertan los demás valores
+         i = i->siguiente; // se avanza al siguiente campo
+         j++; // campoi
       }
-      ptrLineaAInsertar = concatenarCamposYDelimitador(lineaAInsertar, valoresInicio);
-      if(archivo = fopen(nombreArchivoCSV, "a"))
+      ptrLineaAInsertar = concatenarCamposYDelimitador(lineaAInsertar, valoresInicio); // se obtine la cadena formato listo.
+      if(archivo = fopen(nombreArchivoCSV, "a+")) // abrimos el archivo para agregar la línea anterior al archivo
       {
-         direccionLogica = ftell(archivo); // dirección lógica de la línea a insertar
-         claveAAdicionar.direccionLogica = direccionLogica; // copio direccion lógica al tipoClave
-         strcpy(claveAAdicionar.campo, clave); // copio clave al tipoClave
          fprintf(archivo, "%s\n", ptrLineaAInsertar);
+         direccionLogica = *direccionUltima;
+         claveAAdicionar.direccionLogica = direccionLogica; // copiamos la direccion obtenida al campo del tipoClave del árbol-b
+         strcpy(claveAAdicionar.campo, clave); // copio clave al tipoClave
+         *direccionUltima = *direccionUltima + strlen(ptrLineaAInsertar) + 2; // actualizo la dirección lógica de la próxima adición.
          insertar(raiz, claveAAdicionar); // agregar al árbol-b
          fclose(archivo);
+         eliminaLista(&valoresInicio, &valoresFin); // Libero memoria al eliminar la lista.
          return 1;
       }
       else
@@ -223,21 +228,22 @@ void leerCampoClave(char *clave, char *nombreCampoClave, NODO *inicio, char *ope
    gets(clave); // CAMPO CLAVE a insertar
 }
 
-int editarRegistro(char *nombreArchivoCSV, NODO *inicio, int numeroDeCampos, Pagina **raiz)
+int editarRegistro(char *nombreArchivoCSV, NODO *inicio, int numeroDeCampos, Pagina **raiz, long int *direccionUltima)
 {
    FILE *archivo;
    char nombreCampoClave[NOMBRE], clave[CLAVE], linea[LINEA], actualizado[NOMBRE], *copiaLinea, *copiaLineaCabeceras;
-   tipoClave claveABuscar, claveEditada;
+   tipoClave claveABuscar, claveEditada; // Para el arbol-b
    int indiceDePagina = 0, campoAEditar;
    long int direccionLogica;
-   Pagina *encontrado;
-   NODO *valoresInicio, *valoresFin, *editadoInicio, *editadoFin; // lista para almacenar los valores de la línea a editar.
-   crearLista(&valoresInicio, &valoresFin);
-   crearLista(&editadoInicio, &editadoFin);
+   Pagina *encontrado; // Acá se guarda la página(nodo) que contiene la clave buscada y su dirección Lógica ubicado por el índice de página.
+   NODO *valoresInicio, *valoresFin, *editadoInicio, *editadoFin; // listas para almacenar los valores originales de la línea a editar.
+   crearLista(&valoresInicio, &valoresFin); // lista fuente
+   crearLista(&editadoInicio, &editadoFin); // lista editada. Copiada de la fuente, excepto el campo que se modifica.
    leerCampoClave(clave, nombreCampoClave, inicio, "editar");
-   strcpy(claveABuscar.campo, clave);
-   encontrado = buscar(*raiz, claveABuscar, &indiceDePagina);
-   if(encontrado) // Se edita
+   strcpy(claveABuscar.campo, clave); // copio en un tipo de dato adecuado para buscar en el árbol.
+   encontrado = buscar(*raiz, claveABuscar, &indiceDePagina); // busco en el árbol-b la clave
+   printf("Clave: %s\nDireccion Logica: %ld\n", encontrado->claves[indiceDePagina].campo, encontrado->claves[indiceDePagina].direccionLogica);
+   if(encontrado) // Si existe, se edita
    {
       if(archivo = fopen(nombreArchivoCSV, "r"))
       {
@@ -265,14 +271,15 @@ int editarRegistro(char *nombreArchivoCSV, NODO *inicio, int numeroDeCampos, Pag
          puts("Error al abrir archivo!!!");
       if(borraRegistro(nombreArchivoCSV, clave, encontrado, indiceDePagina, numeroDeCampos, raiz))
       {
-         if(archivo = fopen(nombreArchivoCSV, "a"))
+         if(archivo = fopen(nombreArchivoCSV, "a")) // inserto
          {
-            direccionLogica = ftell(archivo);
-            fprintf(archivo, "%s\n", linea);
-            fclose(archivo);
-            strcpy(claveEditada.campo, clave);
-            claveEditada.direccionLogica = direccionLogica;
-            insertar(raiz, claveEditada);
+            fprintf(archivo, "%s\n", linea); // se escribe la nueva línea al final del archivo
+            fclose(archivo); // cerramos luego de operar.
+            direccionLogica = *direccionUltima;
+            strcpy(claveEditada.campo, clave); // copio la clave al campo adecuado de el tipo de datos que guarda el árbol-b
+            claveEditada.direccionLogica = direccionLogica; // copio la dirección Lógica al campo adecuado de tipo de datos del árbol-b
+            *direccionUltima = *direccionUltima + strlen(linea) + 2; // actualizo la dirección lógica de la próxima adición
+            insertar(raiz, claveEditada); // inserta en el arbol-b
             return 1;
          }
          else
@@ -297,7 +304,7 @@ int buscarRegistro(char *nombreArchivoCSV, NODO *inicio, int numeroDeCampos, Pag
    clock_t t_ini, t_fin;
    double secs;
    int campoi, numeroDeEncuentros = 0;
-   char *campoElegido, campoABuscar[NOMBRE], linea[LINEA], *copiaLinea, *ptrToken, *ptrToken2, *copiaLinea2;
+   char *campoElegido, campoABuscar[NOMBRE], linea[LINEA], *copiaLinea, *ptrToken, *copiaLinea2;
    printf("Por que campo buscar?\n");
    campoi = mostrarCabeceras(inicio, numeroDeCampos);
    campoElegido = buscarCampo(campoi, inicio);
@@ -479,7 +486,7 @@ void imprimirLinea(char *linea, int numeroDeCampos)
    }
 }
 
-int creaArchivoDeIndices(char *nombreArchivoCSV, int campo, int numeroDeCampos, Pagina **raiz, int generar)
+int creaArchivoDeIndices(char *nombreArchivoCSV, int campo, int numeroDeCampos, Pagina **raiz, int generar, long int *direccionUltima)
 {
    FILE *archivo, *indices;
    char leer[LINEA], *copiaLinea, *copiaLinea2;
@@ -519,6 +526,7 @@ int creaArchivoDeIndices(char *nombreArchivoCSV, int campo, int numeroDeCampos, 
             }
          }
       }
+      *direccionUltima = direccionLinea;
       fclose(archivo);
       return 1;
    }

@@ -8,13 +8,14 @@
 
 int menu();
 int submenu();
-void operaciones(char *nombreArchivo, NODO *inicio, int opcion, int numeroDeCampos, Pagina **raiz);
+void operaciones(char *nombreArchivo, NODO *inicio, int opcion, int numeroDeCampos, Pagina **raiz, long int *direccionUltima);
 
 int main()
 {
    int eleccion, eleccionSubmenu, numeroDeCampos, *ptrNumeroDeCampos; // el puntero sirve para calcular el número de campos.
+   long int direccionUltima;
    char nombreArchivo[NOMBRE];
-   NODO *cabeceraInicio, *cabeceraFin; // Guarda los nombres de los campos del CSV
+   NODO *cabeceraInicio, *cabeceraFin; // Lista que guarda los nombres de los campos del CSV
    Pagina *raiz; // Árbol-B para realizar algunas verificaciones más rápido.
    ptrNumeroDeCampos = &numeroDeCampos;
    crearLista(&cabeceraInicio, &cabeceraFin);
@@ -30,14 +31,14 @@ int main()
             {
                printf("Archivo correcto...\n");
                guardarCabecerasDelArchivoCSV(nombreArchivo, &cabeceraInicio, &cabeceraFin, ptrNumeroDeCampos);
-               if(creaArchivoDeIndices(nombreArchivo, 1, numeroDeCampos, &raiz, 0))
+               if(creaArchivoDeIndices(nombreArchivo, 1, numeroDeCampos, &raiz, 0, &direccionUltima)) // se genera un árbol-b para ayudar en las operaciones
                {
                   printf("Creado...\n");
                   //dibujaArbol(raiz, 0);
                   do
                   {
                      eleccionSubmenu = submenu();
-                     operaciones(nombreArchivo, cabeceraInicio, eleccionSubmenu, numeroDeCampos, &raiz);
+                     operaciones(nombreArchivo, cabeceraInicio, eleccionSubmenu, numeroDeCampos, &raiz, &direccionUltima);
                   }while(eleccionSubmenu != 7);
                }
                else
@@ -99,12 +100,12 @@ int submenu()
    return opcion;
 }
 
-void operaciones(char *nombreArchivo, NODO *inicio, int opcion, int numeroDeCampos, Pagina **raiz)
+void operaciones(char *nombreArchivo, NODO *inicio, int opcion, int numeroDeCampos, Pagina **raiz, long int *direccionUltima)
 {
    switch(opcion)
    {
       case 1: // Adicionar
-         if(adicionarRegistro(nombreArchivo, inicio, numeroDeCampos, raiz))
+         if(adicionarRegistro(nombreArchivo, inicio, numeroDeCampos, raiz, direccionUltima))
          {
             puts("Registro Adicionado correctamente...");
             //dibujaArbol(*raiz, 0);
@@ -113,7 +114,7 @@ void operaciones(char *nombreArchivo, NODO *inicio, int opcion, int numeroDeCamp
             puts("Error al adicionar el nuevo registro!!!");
          break;
       case 2: // Editar
-         if(editarRegistro(nombreArchivo, inicio, numeroDeCampos, raiz))
+         if(editarRegistro(nombreArchivo, inicio, numeroDeCampos, raiz, direccionUltima))
          {
             puts("Registro Editado correctamente...");
             //dibujaArbol(*raiz, 0);
@@ -142,7 +143,7 @@ void operaciones(char *nombreArchivo, NODO *inicio, int opcion, int numeroDeCamp
          mostrarRegistros(nombreArchivo, numeroDeCampos);
          break;
       case 6: // Crear archivo de índices
-         creaArchivoDeIndices(nombreArchivo, 1, numeroDeCampos, raiz, 1);
+         creaArchivoDeIndices(nombreArchivo, 1, numeroDeCampos, raiz, 1, direccionUltima);
          break;
    }
 }

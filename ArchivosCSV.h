@@ -33,12 +33,12 @@ void guardaCamposClaveDelCSV(); // Guarda en un Árbol-B los valores del CAMPO CL
 /************************************ Utilizadas en el Submenu ************************************/
 // Operaciones a realizar con el archivo seleccionado
 
-int adicionarRegistro(char *nombreArchivoCSV, NODO *inicio, int numeroDeCampos, Pagina **raiz);
-int editarRegistro(char *nombreArchivoCSV, NODO *inicio, int numeroDeCampos, Pagina **raiz);
+int adicionarRegistro(char *nombreArchivoCSV, NODO *inicio, int numeroDeCampos, Pagina **raiz, long int *direccionUltima);
+int editarRegistro(char *nombreArchivoCSV, NODO *inicio, int numeroDeCampos, Pagina **raiz, long int *direccionUltima);
 int buscarRegistro(char *nombreArchivoCSV, NODO *inicio, int numeroDeCampos, Pagina **raiz);
 int eliminarRegistroCSV(char *nombreArchivoCSV, NODO *inicio, int numeroDeCampos, Pagina **raiz);
 void mostrarRegistros(char *nombreArchivoCSV, int numeroDeCampos);
-int creaArchivoDeIndices(char *nombreArchivoCSV, int campo, int numeroDeCampos, Pagina **raiz, int generar);
+int creaArchivoDeIndices(char *nombreArchivoCSV, int campo, int numeroDeCampos, Pagina **raiz, int generar, long int *direccionUltima);
 
 // funciones auxiliares para: - adicionarRegistro()
                            // - editarRegistro()
