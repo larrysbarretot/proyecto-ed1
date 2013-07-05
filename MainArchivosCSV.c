@@ -5,6 +5,7 @@
 #include "pagina.h"
 #include "ArbolB.h"
 #include "ArchivosCSV.h"
+#include <time.h>
 
 int menu();
 int submenu();
@@ -12,11 +13,13 @@ void operaciones(char *nombreArchivo, NODO *inicio, int opcion, int numeroDeCamp
 
 int main()
 {
-   int eleccion, eleccionSubmenu, numeroDeCampos, *ptrNumeroDeCampos; // el puntero sirve para calcular el número de campos.
+   FILE *buscarArchivo;
+   int eleccion, eleccionSubmenu, eleccionSubmenuArbolB, numeroDeCampos, *ptrNumeroDeCampos, indice=0, dosCampos; // el puntero sirve para calcular el número de campos.
    long int direccionUltima;
-   char nombreArchivo[NOMBRE];
+   char nombreArchivo[NOMBRE], nombreArchivoIndice[NOMBRE], *ptrArchivoIndice, campoClave[CLAVE], lineaEncontrada[LINEA], leer[LINEA], *ptrleer, *campo, fuente[NOMBRE], *ptrFuente;
    NODO *cabeceraInicio, *cabeceraFin; // Lista que guarda los nombres de los campos del CSV
-   Pagina *raiz; // Árbol-B para realizar algunas verificaciones más rápido.
+   Pagina *raiz, *encontrado; // Árbol-B para realizar algunas verificaciones más rápido.
+   tipoClave aBuscar;
    ptrNumeroDeCampos = &numeroDeCampos;
    crearLista(&cabeceraInicio, &cabeceraFin);
    crearArbolB(&raiz);
@@ -66,8 +69,100 @@ int main()
                puts("El archivo debe tener extension .csv");
             }
             break;
+         case 3:
+            dosCampos = 1;
+            tipoClave cl;
+            ptrArchivoIndice = leerNombreDeArchivo(nombreArchivoIndice);
+            if(verificaNombreDeArchivoCSV(ptrArchivoIndice))
+            {
+               if(verificaQueExistaArchivoCSV(ptrArchivoIndice))
+               {
+                  // Se debería crear una función para esto
+                  buscarArchivo = fopen(ptrArchivoIndice, "r");
+                  while(1)
+                  {
+                     fgets(leer, LINEA, buscarArchivo);
+                     quitaSaltoDeLinea(leer);
+                     ptrleer = strdup(leer);
+                     if(feof(buscarArchivo)) break;
+                     campo = strtok(ptrleer, DELIMITADOR);
+                     while(campo)
+                     {
+                        if(dosCampos)
+                        {
+                           cl.direccionLogica = atol(campo);
+                           printf("%s ", campo);
+                           dosCampos = 0;
+                        }
+                        else
+                        {
+                           strcpy(cl.campo, campo);
+                           dosCampos = 1;
+                           printf("%s\n", campo);
+                           insertar(&raiz, cl);
+                        }
+                        campo = strtok(NULL, DELIMITADOR);
+                     }
+                  }
+
+                  // fin de la que debería ser una función
+                  do
+                  {
+                     eleccionSubmenuArbolB = submenuArbolB();
+                     if(eleccionSubmenuArbolB == 1)
+                     {
+                        puts("Ingrese el nombre del CAMPO CLAVE A BUSCAR.");
+                        printf("-> ");
+                        fflush(stdin);
+                        gets(campoClave);
+                        strcpy(aBuscar.campo, campoClave);
+                        clock_t t_ini, t_fin;
+                        double secs;
+                        t_ini = clock(); // empieza a medir el tiempo
+                        encontrado = buscar(raiz, aBuscar, &indice);
+                        if(encontrado)
+                        {
+                           ptrFuente = leerNombreDeArchivo(fuente);
+                           if(verificaNombreDeArchivoCSV(ptrFuente))
+                           {
+                              if(verificaQueExistaArchivoCSV(ptrFuente))
+                              {
+                                 if(buscarArchivo = fopen(ptrFuente, "r"))
+                                 {
+                                    fseek(buscarArchivo, encontrado->claves[indice].direccionLogica, SEEK_SET);
+                                    fgets(lineaEncontrada, LINEA, buscarArchivo);
+                                    printf("%s\n", lineaEncontrada);
+                                    t_fin = clock(); // medicion del tiempo completa
+                                    secs = (double)(t_fin - t_ini) / CLOCKS_PER_SEC;
+                                    printf("%.16g milisegundos\n", secs * 1000.0);
+                                    puts("Registro encontrado...");
+                                    fclose(buscarArchivo);
+                                 }
+                                 else
+                                    puts("ERROR al leer archivo!!!");
+                              }
+                              else
+                                 printf("%s, NO EXISTE!!!", ptrFuente);
+                           }
+                           else
+                              puts("El archivo debe tener extension .csv");
+                        }
+                        else
+                           puts("Registro NO ENCONTRADO!!!");
+                     }
+                  }while(eleccionSubmenuArbolB != 2);
+               }
+               else
+                  printf("%s, NO EXISTE!!!", ptrArchivoIndice);
+
+            }
+            else
+            {
+               puts("El archivo debe tener extension .csv");
+            }
+            break;
       }
-   }while(eleccion != 3);
+   }while(eleccion != 4);
 
    return 0;
 }
@@ -75,10 +170,14 @@ int main()
 int menu()
 {
    int opcion;
-   puts("\nARCHIVOS .CSV\n");
+   puts("\n     ARCHIVOS .CSV - APLICACION ARBOL-B     \n");
+   puts("----------------------------------------------");
    puts("1) Seleccionar archivo CSV");
    puts("2) Crear archivo CSV");
-   puts("3) Salir");
+   puts("----------------------------------------------");
+   puts("3) Generar ARBOL-B a partir de un archivo .csv");
+   puts("----------------------------------------------");
+   puts("4) Salir");
    printf("Digite la opcion(numero) elegida -> ");
    scanf("%d", &opcion);
    return opcion;
@@ -95,6 +194,17 @@ int submenu()
    puts("5) Mostrar");
    puts("6) Crear archivo de Indices");
    puts("7) Volver a Menu");
+   printf("Digite la opcion(numero) elegida -> ");
+   scanf("%d", &opcion);
+   return opcion;
+}
+
+int submenuArbolB()
+{
+   int opcion;
+   puts("\nOPERACIONES CON EL ARBOL-B");
+   puts("1) Buscar");
+   puts("2) Salir");
    printf("Digite la opcion(numero) elegida -> ");
    scanf("%d", &opcion);
    return opcion;
