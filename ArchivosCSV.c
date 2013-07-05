@@ -485,7 +485,7 @@ void imprimirLinea(char *linea, int numeroDeCampos)
    }
 }
 
-int creaArchivoDeIndices(char *nombreArchivoCSV, int campo, int numeroDeCampos, Pagina **raiz, int generar, long int *direccionUltima)
+int creaArchivoDeIndices(char *nombreArchivoCSV, char *nombreArchivoIndice, int campo, int numeroDeCampos, Pagina **raiz, int generar, long int *direccionUltima)
 {
    FILE *archivo, *indices;
    char leer[LINEA], *copiaLinea, *copiaLinea2;
@@ -513,14 +513,14 @@ int creaArchivoDeIndices(char *nombreArchivoCSV, int campo, int numeroDeCampos, 
             }
             if(generar == 1)
             {
-               indices = fopen("codIndex.csv", "a");
+               indices = fopen(nombreArchivoIndice, "a");
                if(indices == NULL)
                {
-                  indices = fopen("codIndex.csv", "w");
+                  indices = fopen(nombreArchivoIndice, "w");
                   fclose(indices);
-                  indices = fopen("codIndex.csv", "a");
+                  indices = fopen(nombreArchivoIndice, "a");
                }
-               fprintf(indices, "%ld;%s;\n", direccionLinea, devuelveCampo(1, copiaLinea2));
+               fprintf(indices, "%ld;%s;\n", direccionLinea, devuelveCampo(campo, copiaLinea2));
                fclose(indices);
             }
          }

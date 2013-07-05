@@ -38,7 +38,7 @@ int editarRegistro(char *nombreArchivoCSV, NODO *inicio, int numeroDeCampos, Pag
 int buscarRegistro(char *nombreArchivoCSV, NODO *inicio, int numeroDeCampos, Pagina **raiz);
 int eliminarRegistroCSV(char *nombreArchivoCSV, NODO *inicio, int numeroDeCampos, Pagina **raiz);
 void mostrarRegistros(char *nombreArchivoCSV, int numeroDeCampos);
-int creaArchivoDeIndices(char *nombreArchivoCSV, int campo, int numeroDeCampos, Pagina **raiz, int generar, long int *direccionUltima);
+int creaArchivoDeIndices(char *nombreArchivoCSV, char *nombreArchivoIndice, int campo, int numeroDeCampos, Pagina **raiz, int generar, long int *direccionUltima);
 
 // funciones auxiliares para: - adicionarRegistro()
                            // - editarRegistro()

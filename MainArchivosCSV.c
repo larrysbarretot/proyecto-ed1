@@ -31,7 +31,7 @@ int main()
             {
                printf("Archivo correcto...\n");
                guardarCabecerasDelArchivoCSV(nombreArchivo, &cabeceraInicio, &cabeceraFin, ptrNumeroDeCampos);
-               if(creaArchivoDeIndices(nombreArchivo, 1, numeroDeCampos, &raiz, 0, &direccionUltima)) // se genera un árbol-b para ayudar en las operaciones
+               if(creaArchivoDeIndices(nombreArchivo, "", 1, numeroDeCampos, &raiz, 0, &direccionUltima)) // se genera un árbol-b para ayudar en las operaciones
                {
                   printf("Creado...\n");
                   //dibujaArbol(raiz, 0);
@@ -102,6 +102,8 @@ int submenu()
 
 void operaciones(char *nombreArchivo, NODO *inicio, int opcion, int numeroDeCampos, Pagina **raiz, long int *direccionUltima)
 {
+   int campoElegido;
+   char nombreArchivoIndice[NOMBRE], *ptrNombreIndice;
    switch(opcion)
    {
       case 1: // Adicionar
@@ -143,7 +145,18 @@ void operaciones(char *nombreArchivo, NODO *inicio, int opcion, int numeroDeCamp
          mostrarRegistros(nombreArchivo, numeroDeCampos);
          break;
       case 6: // Crear archivo de índices
-         creaArchivoDeIndices(nombreArchivo, 1, numeroDeCampos, raiz, 1, direccionUltima);
+         printf("\nPor que CAMPO desea crear el ARCHIVO DE INDICES?\n");
+         campoElegido = mostrarCabeceras(inicio, numeroDeCampos);
+         ptrNombreIndice = leerNombreDeArchivo(nombreArchivoIndice);
+         if(verificaNombreDeArchivoCSV(ptrNombreIndice))
+         {
+            if(creaArchivoDeIndices(nombreArchivo, ptrNombreIndice, campoElegido, numeroDeCampos, raiz, 1, direccionUltima))
+               printf("El archivo %s se ha creado correctamente...\n", nombreArchivoIndice);
+            else
+               puts("Se produjo algun ERROR en la creacion!!!");
+         }
+         else
+            puts("El archivo debe tener extension .csv");
          break;
    }
 }
