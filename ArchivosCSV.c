@@ -242,7 +242,6 @@ int editarRegistro(char *nombreArchivoCSV, NODO *inicio, int numeroDeCampos, Pag
    leerCampoClave(clave, nombreCampoClave, inicio, "editar");
    strcpy(claveABuscar.campo, clave); // copio en un tipo de dato adecuado para buscar en el árbol.
    encontrado = buscar(*raiz, claveABuscar, &indiceDePagina); // busco en el árbol-b la clave
-   printf("Clave: %s\nDireccion Logica: %ld\n", encontrado->claves[indiceDePagina].campo, encontrado->claves[indiceDePagina].direccionLogica);
    if(encontrado) // Si existe, se edita
    {
       if(archivo = fopen(nombreArchivoCSV, "r"))
@@ -481,7 +480,7 @@ void imprimirLinea(char *linea, int numeroDeCampos)
          return;
       }
       i++;
-      printf("%-18s", campo); // %-1s para que se vea en dos líneas
+      printf("%-20s", campo); // %-1s para que se vea en dos líneas
       campo = strtok(NULL, DELIMITADOR);
    }
 }

@@ -298,7 +298,7 @@ ID;Marital Status;Gender;Children;Education;Occupation;Cars;Region;Age;Purchased
 26663;Single;Female;2;Bachelors;Professional;1;Pacific;39;Yes;1;
 11896;Married;Male;1;Graduate Degree;Management;0;Pacific;36;Yes;1;
 14189;Married;Female;4;High School;Professional;2;Europe;54;Yes;1;
-13136;Married;Female;2;Partial College;Clerical;2;Pacific;69;No;1;
+13136;Married;Female;2;Partial College;Clerical;2;Pacific;69;No;0;
 25906;Single;Female;5;High School;Skilled Manual;2;Pacific;62;No;1;
 17926;Married;Female;0;Bachelors;Clerical;0;Pacific;28;Yes;1;
 26928;Single;Male;1;Bachelors;Clerical;0;Europe;62;Yes;1;
@@ -991,7 +991,7 @@ ID;Marital Status;Gender;Children;Education;Occupation;Cars;Region;Age;Purchased
 29134;Married;Male;4;Bachelors;Skilled Manual;3;North America;42;No;1;
 14332;Single;Female;0;High School;Skilled Manual;2;North America;26;No;1;
 19117;Single;Female;1;Graduate Degree;Professional;0;North America;36;Yes;1;
-22864;Married;Male;2;Partial College;Professional;0;North America;49;Yes;1;
+22864;Married;Male;2;Partial College;Professional;0;North America;49;Yes;0;
 11292;Single;Male;1;Partial College;Professional;3;North America;44;Yes;1;
 13466;Married;Male;5;Partial College;Professional;3;North America;46;No;1;
 23731;Married;Male;2;High School;Professional;2;North America;54;Yes;1;
@@ -1001,3 +1001,4 @@ ID;Marital Status;Gender;Children;Education;Occupation;Cars;Region;Age;Purchased
 12121;Single;Male;3;High School;Professional;2;North America;53;Yes;0;
 19664;Single;Male;3;Bachelors;Software;3;North America;38;No;1;
 ID;Marital Status;Gender;Children;Education;Occupation;Cars;Region;18;Purchased Bike;Estado;
+13136;Single;Female;2;Partial College;Clerical;2;Pacific;69;No;1;
